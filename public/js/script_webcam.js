@@ -1,23 +1,20 @@
-// Obtención de los elementos video y canvas del DOM por su ID
+// Obtención de elementos del DOM por su ID
 const video = document.getElementById('inputVideo');
 const canvas = document.getElementById('overlay');
 
-// Definición de la URL base para los modelos de la librería faceapi.js
+// Definición de la URL base para los modelos de faceapi.js
 const MODEL_URL = '/public/models';
 
-// Función asincrónica para cargar los modelos necesarios de faceapi.js
+// Función asincrónica para cargar modelos de faceapi.js
 async function loadModels() {
     await faceapi.loadSsdMobilenetv1Model(MODEL_URL);
     await faceapi.loadFaceLandmarkModel(MODEL_URL);
     await faceapi.loadFaceRecognitionModel(MODEL_URL);
     await faceapi.loadFaceExpressionModel(MODEL_URL);
 }
-// Llamada a la función para cargar los modelos
-loadModels();
 
 // Función asincrónica que se ejecuta al reproducir el video
 async function onPlay() {
-    // Si el video está pausado o terminado, se retrasa la ejecución
     if (video.paused || video.ended) return setTimeout(() => onPlay());
 
     // Detección de rostros y sus características
@@ -26,7 +23,7 @@ async function onPlay() {
         .withFaceDescriptors()
         .withFaceExpressions();
 
-    // Ajuste de las dimensiones de detección al tamaño del canvas
+    // Ajuste de dimensiones de detección al tamaño del canvas
     const dims = faceapi.matchDimensions(canvas, video, true);
     const resizedResults = faceapi.resizeResults(fullFaceDescriptions, dims);
 
@@ -42,9 +39,10 @@ async function onPlay() {
     requestAnimationFrame(onPlay);
 }
 
-// Función autoejecutable para obtener acceso a la cámara web
+// Función autoejecutable para cargar modelos y obtener acceso a la cámara web
 (async () => {
+    await loadModels(); // Asegura que los modelos estén cargados antes de iniciar la detección
     const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
     video.srcObject = stream;
-    onPlay();
+    onPlay(); // Inicia onPlay solo después de cargar los modelos
 })();
