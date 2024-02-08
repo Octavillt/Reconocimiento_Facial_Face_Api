@@ -45,22 +45,26 @@ const MODEL_URL = '/public/models';
 async function loadModels() {
     /**
      * Dentro de esta función se cargarán los modelos necesarios para el reconocimiento facial.
-     * Carga secuencial de los modelos de detección facial, puntos de referencia, reconocimiento y expresiones.
      */
 
     /**
+     * Carga secuencial de los modelos de detección facial, puntos de referencia, reconocimiento y expresiones.
      * 'await' es utilizado para esperar a que se resuelva la promesa retornada por faceapi.loadSsdMobilenetv1Model(MODEL_URL).
      * Esta línea carga el modelo SSD MobileNet v1, que es un modelo de detección facial.
-     * await faceapi.loadSsdMobilenetv1Model(MODEL_URL);
      */
-    await faceapi.loadFaceLandmarkModel(MODEL_URL);
+    await faceapi.loadSsdMobilenetv1Model(MODEL_URL);
 
     /**
-     * Esta línea carga el modelo de reconocimiento facial, que permite identificar y diferenciar entre diferentes rostros.
      * Similar a la línea anterior, esta espera a que se cargue el modelo de puntos de referencia faciales.
      * Este modelo es útil para identificar puntos específicos en la cara, como los bordes de la boca o los ojos.
      */
+    await faceapi.loadFaceLandmarkModel(MODEL_URL);
+
+    /** 
+     * Esta línea carga el modelo de reconocimiento facial, que permite identificar y diferenciar entre diferentes rostros.
+    */
     await faceapi.loadFaceRecognitionModel(MODEL_URL);
+    
     /**
      * Finalmente, esta línea carga el modelo de expresiones faciales, que puede detectar expresiones como felicidad, tristeza, sorpresa, etc.
      */
@@ -118,8 +122,8 @@ async function onPlay() {
      * Incluyen las cajas de detección de rostros, los puntos de referencia y las expresiones faciales.
      */
     faceapi.draw.drawDetections(canvas, resizedResults);
-    faceapi.draw.drawFaceLandmarks(canvas, resizedResults);
-    faceapi.draw.drawFaceExpressions(canvas, resizedResults, 0.05);
+    // faceapi.draw.drawFaceLandmarks(canvas, resizedResults);
+    // faceapi.draw.drawFaceExpressions(canvas, resizedResults, 0.05);
 
 
     /**
