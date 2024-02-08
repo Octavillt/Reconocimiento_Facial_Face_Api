@@ -1,42 +1,50 @@
-// Obtiene elementos del DOM: el video y el canvas para mostrar la cámara web y los resultados del reconocimiento facial.
+// Obtención de los elementos video y canvas del DOM por su ID
 const video = document.getElementById('inputVideo');
 const canvas = document.getElementById('overlay');
 
-// Función autoinvocada para iniciar la cámara web.
-(async () => {
-    // Solicita acceso a la cámara web del usuario.
-    const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
-    // Establece el stream de la cámara web como la fuente del elemento de video.
-    video.srcObject = stream;
-    console.log(video); // Imprime el elemento de video en la consola para depuración.
-})();
+// Definición de la URL base para los modelos de la librería faceapi.js
+const MODEL_URL = '/public/models';
 
-// Función asincrónica 'onPlay' para procesar el video y realizar el reconocimiento facial.
-async function onPlay() {
-    // URL del modelo para cargar los modelos de reconocimiento facial.
-    const MODEL_URL = '/public/models';
-
-    // Carga los modelos de reconocimiento facial de face-api.js.
+// Función asincrónica para cargar los modelos necesarios de faceapi.js
+async function loadModels() {
     await faceapi.loadSsdMobilenetv1Model(MODEL_URL);
     await faceapi.loadFaceLandmarkModel(MODEL_URL);
     await faceapi.loadFaceRecognitionModel(MODEL_URL);
     await faceapi.loadFaceExpressionModel(MODEL_URL);
+}
+// Llamada a la función para cargar los modelos
+loadModels();
 
-    // Detecta todas las caras en el video, con detalles faciales y expresiones.
+// Función asincrónica que se ejecuta al reproducir el video
+async function onPlay() {
+    // Si el video está pausado o terminado, se retrasa la ejecución
+    if (video.paused || video.ended) return setTimeout(() => onPlay());
+
+    // Detección de rostros y sus características
     let fullFaceDescriptions = await faceapi.detectAllFaces(video)
         .withFaceLandmarks()
         .withFaceDescriptors()
         .withFaceExpressions();
 
-    // Ajusta las dimensiones de los resultados al canvas.
+    // Ajuste de las dimensiones de detección al tamaño del canvas
     const dims = faceapi.matchDimensions(canvas, video, true);
     const resizedResults = faceapi.resizeResults(fullFaceDescriptions, dims);
 
-    // Dibuja los resultados en el canvas: detecciones, puntos faciales y expresiones.
+    // Limpieza del canvas antes de dibujar los nuevos resultados
+    canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+
+    // Dibujar detecciones, puntos de referencia y expresiones faciales en el canvas
     faceapi.draw.drawDetections(canvas, resizedResults);
     faceapi.draw.drawFaceLandmarks(canvas, resizedResults);
     faceapi.draw.drawFaceExpressions(canvas, resizedResults, 0.05);
 
-    // Llama a 'onPlay' cada 100 ms para actualizar los resultados.
-    setTimeout(() => onPlay(), 100);
+    // Uso de requestAnimationFrame para una actualización fluida de los gráficos
+    requestAnimationFrame(onPlay);
 }
+
+// Función autoejecutable para obtener acceso a la cámara web
+(async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
+    video.srcObject = stream;
+    onPlay();
+})();
