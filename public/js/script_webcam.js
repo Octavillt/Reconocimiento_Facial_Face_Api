@@ -1,6 +1,5 @@
 /**
  * Uso de faceapi.js para reconocimiento facial en una aplicación web.
- * Esta línea es un comentario para indicar que el código a continuación está relacionado con el uso de la biblioteca faceapi.js, 
  * que es una popular librería de JavaScript para el reconocimiento facial.
  * Obtención de elementos del DOM para la visualización de video y resultados.
  * Aquí empezamos a interactuar con la interfaz de usuario de la página web.
